@@ -1,0 +1,1 @@
+async function loadAlerts(){try{const d=await sigapFetch("/api/alerts");const a=Array.isArray(d)?d:(d?.data||d?.alerts||[]);alertStatus.textContent=a.length?"WASPADA":"AMAN";alertInfo.textContent=a.length?a.length+" peringatan tersedia":"Tidak ada peringatan aktif"}catch(e){alertStatus.textContent="—";alertInfo.textContent="Pusat peringatan belum dapat dihubungi"}}loadAlerts();

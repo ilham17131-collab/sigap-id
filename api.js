@@ -1,0 +1,1 @@
+window.SIGAP_API="https://sigap-id.wispbyte.app";window.sigapFetch=async(p,o={})=>{const r=await fetch(window.SIGAP_API+p,o);if(!r.ok)throw Error("HTTP "+r.status);return r.json()}
