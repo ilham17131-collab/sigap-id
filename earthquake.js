@@ -10,67 +10,31 @@ async function loadEarthquakes() {
       throw new Error("API gempa gagal");
     }
 
-    const earthquakes = Array.isArray(result.data)
-      ? result.data
-      : [];
+    const earthquakes = result.data || [];
 
     if (earthquakes.length === 0) {
-      if (magnitudeEl) magnitudeEl.textContent = "—";
-      if (infoEl) infoEl.textContent = "Belum ada data gempa.";
+      magnitudeEl.textContent = "—";
+      infoEl.textContent = "Belum ada data gempa.";
       return;
     }
 
     const latest = earthquakes[0];
 
-    const magnitude = Number(latest.magnitude);
+    magnitudeEl.textContent =
+      "M " + Number(latest.magnitude).toFixed(1);
 
-    const magText = Number.isFinite(magnitude)
-      ? `M ${magnitude.toFixed(1)}`
-      : "—";
-
-    const location = latest.location || "Lokasi tidak tersedia";
-    const depth = latest.depth_km ?? "—";
-    const date = latest.date || "";
-    const time = latest.time || "";
-    const potential = latest.potential || "";
-
-    if (magnitudeEl) {
-      magnitudeEl.textContent = magText;
-    }
-
-    if (infoEl) {
-      infoEl.innerHTML =
-        `${escapeHtml(location)}<br>` +
-        `Kedalaman ${escapeHtml(String(depth))} km<br>` +
-        `${escapeHtml(date)} • ${escapeHtml(time)}<br>` +
-        `${escapeHtml(potential)}`;
-    }
+    infoEl.innerHTML =
+      latest.location + "<br>" +
+      "Kedalaman " + latest.depth_km + " km<br>" +
+      latest.date + " • " + latest.time + "<br>" +
+      latest.potential;
 
   } catch (error) {
-    console.error("SIGAP.ID Gempa:", error);
+    console.error(error);
 
-    if (magnitudeEl) {
-      magnitudeEl.textContent = "—";
-    }
-
-    if (infoEl) {
-      infoEl.textContent = "Gagal memuat data gempa.";
-    }
+    magnitudeEl.textContent = "—";
+    infoEl.textContent = "Gagal memuat data gempa.";
   }
 }
 
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-
-document.addEventListener(
-  "DOMContentLoaded",
-  loadEarthquakes
-);
+document.addEventListener("DOMContentLoaded", loadEarthquakes);
