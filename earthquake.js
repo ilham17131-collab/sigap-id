@@ -23,6 +23,7 @@ async function loadEarthquakes() {
     const latest = earthquakes[0];
 
     const magnitude = Number(latest.magnitude);
+
     const magText = Number.isFinite(magnitude)
       ? `M ${magnitude.toFixed(1)}`
       : "—";
@@ -42,7 +43,7 @@ async function loadEarthquakes() {
         `${escapeHtml(location)}<br>` +
         `Kedalaman ${escapeHtml(String(depth))} km<br>` +
         `${escapeHtml(date)} • ${escapeHtml(time)}<br>` +
-        `<span>${escapeHtml(potential)}</span>`;
+        `${escapeHtml(potential)}`;
     }
 
   } catch (error) {
@@ -58,6 +59,7 @@ async function loadEarthquakes() {
   }
 }
 
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -67,4 +69,8 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-document.addEventListener("DOMContentLoaded", loadEarthquakes);
+
+document.addEventListener(
+  "DOMContentLoaded",
+  loadEarthquakes
+);
