@@ -1,85 +1,61 @@
-// SIGAP.ID — Earthquake data
-
 async function loadEarthquakes() {
-  const card =
-    document.querySelector("[data-earthquake]") ||
-    document.getElementById("earthquake") ||
-    document.querySelector(".earthquake-card");
+  const magnitudeEl = document.getElementById("earthquakeMag");
+  const infoEl = document.getElementById("earthquakeInfo");
 
   try {
     const response = await sigapFetch("/api/earthquakes");
-    const payload = await response.json();
+    const result = await response.json();
 
-    if (!response.ok || !payload.success) {
-      throw new Error("Earthquake API error");
+    if (!response.ok || !result.success) {
+      throw new Error("API gempa gagal");
     }
 
-    const list = Array.isArray(payload.data) ? payload.data : [];
-    const latest = list[0];
+    const earthquakes = Array.isArray(result.data)
+      ? result.data
+      : [];
 
-    if (!latest) {
-      setEarthquakeText(card, "Belum ada data gempa.");
+    if (earthquakes.length === 0) {
+      if (magnitudeEl) magnitudeEl.textContent = "—";
+      if (infoEl) infoEl.textContent = "Belum ada data gempa.";
       return;
     }
 
+    const latest = earthquakes[0];
+
     const magnitude = Number(latest.magnitude);
     const magText = Number.isFinite(magnitude)
-      ? magnitude.toFixed(1)
+      ? `M ${magnitude.toFixed(1)}`
       : "—";
 
-    const depth = latest.depth_km ?? "—";
     const location = latest.location || "Lokasi tidak tersedia";
+    const depth = latest.depth_km ?? "—";
     const date = latest.date || "";
     const time = latest.time || "";
     const potential = latest.potential || "";
 
-    const html = `
-      <div class="eq-main">
-        <div class="eq-magnitude">M ${escapeHtml(magText)}</div>
-        <div class="eq-location">${escapeHtml(location)}</div>
-      </div>
+    if (magnitudeEl) {
+      magnitudeEl.textContent = magText;
+    }
 
-      <div class="eq-meta">
-        <span>Kedalaman ${escapeHtml(String(depth))} km</span>
-        <span>${escapeHtml(date)}${date && time ? " • " : ""}${escapeHtml(time)}</span>
-      </div>
-
-      <div class="eq-potential">
-        ${escapeHtml(potential)}
-      </div>
-    `;
-
-    if (card) {
-      card.innerHTML = html;
-    } else {
-      const mag = document.querySelector("[data-earthquake-magnitude]");
-      const loc = document.querySelector("[data-earthquake-location]");
-      const meta = document.querySelector("[data-earthquake-meta]");
-      const pot = document.querySelector("[data-earthquake-potential]");
-
-      if (mag) mag.textContent = `M ${magText}`;
-      if (loc) loc.textContent = location;
-      if (meta) {
-        meta.textContent =
-          `Kedalaman ${depth} km • ${date} • ${time}`;
-      }
-      if (pot) pot.textContent = potential;
+    if (infoEl) {
+      infoEl.innerHTML =
+        `${escapeHtml(location)}<br>` +
+        `Kedalaman ${escapeHtml(String(depth))} km<br>` +
+        `${escapeHtml(date)} • ${escapeHtml(time)}<br>` +
+        `<span>${escapeHtml(potential)}</span>`;
     }
 
   } catch (error) {
-    console.error("SIGAP.ID earthquake error:", error);
-    setEarthquakeText(card, "Data gempa belum dapat dimuat.");
-  }
-}
+    console.error("SIGAP.ID Gempa:", error);
 
-function setEarthquakeText(card, text) {
-  if (card) {
-    card.textContent = text;
-    return;
-  }
+    if (magnitudeEl) {
+      magnitudeEl.textContent = "—";
+    }
 
-  const loc = document.querySelector("[data-earthquake-location]");
-  if (loc) loc.textContent = text;
+    if (infoEl) {
+      infoEl.textContent = "Gagal memuat data gempa.";
+    }
+  }
 }
 
 function escapeHtml(value) {
