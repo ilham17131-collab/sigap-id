@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SIGAP.ID — Sistem Informasi Kedaruratan</title>
+  <meta name="description" content="Informasi gempa, cuaca, tsunami, dan peringatan bencana Indonesia.">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #172033;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 18px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .brand span {
+      color: #1769ff;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 24px 20px 50px;
+    }
+
+    .hero {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 28px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 20px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #eaf7ef;
+      color: #16733b;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(30px, 6vw, 48px);
+      line-height: 1.05;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      color: #667085;
+      line-height: 1.6;
+      max-width: 650px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 22px;
+      min-height: 150px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      color: #667085;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .value {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 14px 0 4px;
+    }
+
+    .loading {
+      color: #98a2b3;
+    }
+
+    @media (max-width: 650px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      main {
+        padding: 18px 14px 40px;
+      }
+
+      .hero {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="brand">SIGAP<span>.ID</span></div>
+  </header>
+
+  <main>
+
+    <section class="hero">
+      <div class="status">SISTEM ONLINE</div>
+
+      <h1>Command Center<br>SIGAP.ID</h1>
+
+      <p class="subtitle">
+        Pusat informasi cepat untuk memantau gempa, cuaca,
+        tsunami, dan peringatan kebencanaan di Indonesia.
+      </p>
+    </section>
+
+    <section class="grid">
+
+      <div class="card">
+        <h2>Gempa Terkini</h2>
+        <div id="earthquake" class="value loading">
+          Memuat data...
+        </div>
+        <p id="earthquakeInfo">
+          Menghubungkan ke server SIGAP.ID
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Status Sistem</h2>
+        <div id="system" class="value loading">
+          Memeriksa...
+        </div>
+        <p>
+          Koneksi ke backend SIGAP.ID
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Cuaca</h2>
+        <div class="value">--</div>
+        <p>
+          Data cuaca akan terhubung pada tahap berikutnya.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Peringatan</h2>
+        <div class="value">--</div>
+        <p>
+          Pusat notifikasi dan peringatan SIGAP.ID.
+        </p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    const API = "https://sigap-id.wispbyte.app";
+
+    async function loadSystem() {
+      try {
+        const response = await fetch(API + "/api/health");
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById("system").textContent = "ONLINE";
+        } else {
+          document.getElementById("system").textContent = "ERROR";
+        }
+      } catch (error) {
+        document.getElementById("system").textContent = "OFFLINE";
+      }
+    }
+
+    async function loadEarthquake() {
+      try {
+        const response = await fetch(API + "/api/earthquakes");
+        const data = await response.json();
+
+        const earthquake =
+          data?.data ||
+          data?.earthquake ||
+          data;
+
+        const magnitude =
+          earthquake?.magnitude ??
+          earthquake?.Magnitude ??
+          earthquake?.mag;
+
+        if (magnitude) {
+          document.getElementById("earthquake").textContent =
+            "M " + magnitude;
+
+          document.getElementById("earthquakeInfo").textContent =
+            earthquake?.location ||
+            earthquake?.wilayah ||
+            "Gempa terbaru dari sumber resmi";
+        } else {
+          document.getElementById("earthquake").textContent = "AKTIF";
+          document.getElementById("earthquakeInfo").textContent =
+            "Data diterima dari server SIGAP.ID";
+        }
+
+      } catch (error) {
+        document.getElementById("earthquake").textContent = "—";
+        document.getElementById("earthquakeInfo").textContent =
+          "Belum dapat mengambil data";
+      }
+    }
+
+    loadSystem();
+    loadEarthquake();
+  </script>
+
+</body>
+</html>
